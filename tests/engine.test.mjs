@@ -99,7 +99,7 @@ test('both continuous rounds can fuse, split and soak before their shared deadli
   }
 });
 test('all eight starting states are selectable from valid option tags',()=>{
-  const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../dist/high-concept.html',import.meta.url),'utf8');
   const values=[...html.matchAll(/<option\s+value="([^"]+)"/g)].map(m=>m[1]);
   for(const code of CODES)assert.ok(values.includes(code),'Missing option: '+code);
 });
@@ -127,7 +127,7 @@ test('first fusion partners wait apart near two oclock and outside all long conc
 });
 test('floor towers are shown in synthesis phases and both guides use the actual puzzle icons',()=>{
   const app=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
-  const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../dist/high-concept.html',import.meta.url),'utf8');
   assert.match(app,/\[1,2,4,5\]\.includes\(s\)/);
   assert.match(app,/guide-recipes/);
   assert.equal((html.match(/data-puzzle="[ABC]"/g)||[]).length,6);

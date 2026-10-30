@@ -1,4 +1,4 @@
-name: Deploy P8S Concept Lab to GitHub Pages
+name: Deploy Echo Raid Lab to GitHub Pages
 
 on:
   push:
@@ -23,6 +23,14 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check JavaScript and mechanic engine
+        run: |
+          npm run check
+          npm test
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site

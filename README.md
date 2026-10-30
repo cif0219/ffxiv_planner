@@ -1,4 +1,61 @@
-# 概念實驗室 · P8S High Concept I
+# 迴響演練室 · ECHO / RAID LAB
+
+公開網站：[cif0219.github.io/ffxiv_planner](https://cif0219.github.io/ffxiv_planner/) · 原始碼：[cif0219/ffxiv_planner](https://github.com/cif0219/ffxiv_planner)
+
+從 [ffxivtesthub/p8s-concept](https://github.com/ffxivtesthub/p8s-concept) 延伸的 FFXIV 副本攻略與互動走位練習入口。零建置、零 npm 套件依賴、繁體中文，保留原版概念支配 I 的引擎、素材與獨立專練頁。
+
+## 本機啟動
+
+需要 Node.js 24（與 CI 一致）。在專案目錄執行：
+
+```sh
+npm start
+```
+
+開啟 http://127.0.0.1:4173 。入口為 `dist/index.html`；P8S 使用 `#/raids/p8s`，不需要伺服器端路由，直接支援 GitHub Pages 子目錄部署。原版專練位於 `high-concept.html`。
+
+```sh
+npm test
+npm run check
+```
+
+## 已實作
+
+- 多副本目錄、搜尋、可用／規劃篩選。P8S 可演練；P5S、P6S、P7S、P12S 明確標記為規劃，未假裝提供模擬。
+- P8S 前後半 16 章節：開場、蛇 I、獸 I、萬象之火、四重火炎、蛇 II、獸 II、前半轉場、自然支配 I、概念支配 I、萬象灰燼、自然支配 II、概念支配 II、兩次支配者之塔與終局。
+- 蛇先／獸先分支；八個可選隊伍位置；單章或連續流程；手動引導、限時挑戰、自動示範；0.5–2 倍速度、暫停與本步重試。
+- WASD／方向鍵或觸控點擊移動；Q／E 或八方向按鈕轉向；分攤人數、散開重疊、指定角色踩塔、蛇眼朝向、紫圈隔離、火冰遠近誘導、擊退落點與兩秒合成判定。
+- 攻略、當前機制、個人任務與隊伍狀態一起更新。概念支配 I 直接重用原版 `engine.mjs`，顯示遊戲狀態圖示與拼圖。
+- 通過章節全部步驟才記錄完成；示範與跳步不算章節通過。統計、角色與上次章節只存在本機 localStorage，封鎖儲存時仍可使用。
+- 分享網址保存章節、角色、變身順序與隨機種子，重新載入可重現同一組配置。切換視窗或隱藏分頁會自動暫停。
+
+## 擴充架構
+
+| 檔案 | 用途 |
+| --- | --- |
+| `dist/raids.mjs` | 副本目錄、章節攻略與分支時間參考 |
+| `dist/raid-engine.mjs` | 可重現隨機分配、場景資料、幾何與角色判定；不依賴 DOM |
+| `dist/portal.mjs` | 導覽、演練狀態、輸入、SVG 場地、紀錄與攻略呈現 |
+| `dist/portal.css` | 響應式介面、桌面／手機配置 |
+| `dist/engine.mjs` | 保留的概念支配 I 引擎 |
+| `dist/high-concept.html` | 保留的原版概念支配 I 專練 |
+| `tests/raid-engine.test.mjs` | 分支與種子、錯誤判定、連續流程移動與合成時限測試 |
+
+新副本先在目錄使用 `status: 'planned'`。實作對應章節、場景與判定後，再增加路由和演練引擎入口並改為可用。目前播放器載入 P8S；其他副本尚未實作。
+
+## 模擬精度與資料來源
+
+此版本是覆蓋全副本主要機制的**分段教學模擬**，並非遊戲戰鬥系統或逐幀還原。實戰參考事件時間依 [Cactbot P8S 時間軸](https://github.com/quisquous/cactbot/blob/main/ui/raidboss/data/06-ew/raid/p8s.txt) 整理；前後半各自計時，前半依不同變身分支換算。畫面中的教學倒數獨立於實戰時間，包含移動和觀察時間。
+
+機制交叉參考 [P8S 機制資料](https://ffxiv.consolegameswiki.com/wiki/P8S)，概念支配 I 保留原專案的[菓子攻略](https://www.bilibili.com/video/BV1q3411Q7jg/)配置。狀態圖示來源與版權見 `dist/assets/status/README.md`。
+
+目前簡化：地火呈現結算格；蛇的分工、獸 II 路徑與概念 II 牽線使用教學配置；概念 II 是帶預設合成狀態的分段檢查點，尚未完整重現所有塔色與分身隨機排列。範圍與移速為教學值。不計算傷害、治療、減傷、仇恨、輸出循環、擊殺門檻或網路延遲；終局通過代表完成走位演練。不同隊伍與攻略的站位可能不同。
+
+## 驗證
+
+`npm test` 包含保留的概念支配 I 測試與新副本引擎測試：兩種分支 × 40 組種子的建議解法、漏塔／重疊／錯誤朝向／擊退死亡、合成中斷與鎖定，以及兩種分支 × 12 組種子的完整連續自動走位。CI 先執行語法檢查與測試再部署 `dist/`。
+
+## 原版概念支配 I 說明
 
 零建置靜態網頁，繁體中文、單人走位。其餘七名隊員自動操作。
 
