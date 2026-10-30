@@ -1,4 +1,6 @@
 export const RAIDS = [
+  {id:'m5s',code:'M5S',title:'阿卡狄亞・中量級 1',en:'AAC CRUISERWEIGHT M1 · SAVAGE',boss:'派對小子',tier:'阿卡狄亞中量級',expansion:'黃金的遺產',patch:'7.2',status:'ready',tags:['零式','8 人','MMW × XivStrat'],description:'踩著節拍讀半場刀，追著聚光燈找到自己的位置。三階段、十五章的派對走位演練。',accent:'#d4a1d5'},
+  {id:'top',code:'TOP',title:'歐米茄驗證絕境戰',en:'THE OMEGA PROTOCOL · ULTIMATE',boss:'歐米茄',tier:'絕境戰',expansion:'曉月之終途',patch:'6.31',status:'ready',tags:['絕歐','8 人','莫古力・教學版'],description:'從循環程序到阿爾法歐米茄。依莫古力攻略章節建立的分段走位與機制原理演練，進階機制採預設檢查點。',accent:'#9fbddd'},
   {id:'p8s', code:'P8S', title:'煉獄之章・第四層', en:'ABYSSOS · THE EIGHTH CIRCLE', boss:'赫淮斯托斯', tier:'煉獄之章', expansion:'曉月之終途', patch:'6.2', status:'ready', tags:['零式','8 人','前半 + 後半'], description:'從蛇與獸的變身，到概念的重組。在攻略裡理解，在場地上熟練。', accent:'#dba879'},
   {id:'p5s', code:'P5S', title:'煉獄之章・第一層', en:'ABYSSOS · THE FIFTH CIRCLE', boss:'紅寶石獸', tier:'煉獄之章', expansion:'曉月之終途', status:'planned', tags:['零式','8 人'], description:'毒池、反射與八連跳。', accent:'#aa8bbd'},
   {id:'p6s', code:'P6S', title:'煉獄之章・第二層', en:'ABYSSOS · THE SIXTH CIRCLE', boss:'赫格莫涅', tier:'煉獄之章', expansion:'曉月之終途', status:'planned', tags:['零式','8 人'], description:'寄生、交換與場地變換。', accent:'#8ea6bb'},

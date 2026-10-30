@@ -1,5 +1,7 @@
 import {ROLES,createEncounter,checkpointPositions,tickFusion,livePlan,liveConcept,validateRound,shuffle,distance} from './engine.mjs';
 import {chapterOrder} from './raids.mjs';
+import {validateTopRules} from './top-rules.mjs';
+import {validateM5sRules,inCone} from './m5s-rules.mjs';
 export {ROLES,distance};
 const pt=(x,y)=>({x,y});
 const clone=p=>p.map(v=>({...v}));
@@ -10,7 +12,7 @@ const circle=(x,y,r)=>({kind:'circle',x,y,r});
 const rect=(x,y,w,h)=>({kind:'rect',x,y,w,h});
 const corners=[pt(14,14),pt(14,86),pt(86,86),pt(86,14)];
 export function seededRandom(seed){let x=Number(seed)>>>0;return()=>{x+=0x6D2B79F5;let t=x;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
-export function inside(p,h){return h.kind==='circle'?distance(p,h)<=h.r:h.kind==='rect'?p.x>=h.x&&p.x<=h.x+h.w&&p.y>=h.y&&p.y<=h.y+h.h:false;}
+export function inside(p,h){return h.kind==='circle'?distance(p,h)<=h.r:h.kind==='rect'?p.x>=h.x&&p.x<=h.x+h.w&&p.y>=h.y&&p.y<=h.y+h.h:h.kind==='annulus'?distance(p,h)>=h.inner&&distance(p,h)<=h.r:h.kind==='cone'?inCone(p,h,h.angle,h.width,h.r):false;}
 export function angleTo(a,b){return Math.atan2(b.y-a.y,b.x-a.x);}
 export function angleDelta(a,b){return Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));}
 export function knockback(p,origin,amount){const d=distance(p,origin);return d<.001?{...p}:pt(p.x+(p.x-origin.x)/d*amount,p.y+(p.y-origin.y)/d*amount);}
@@ -130,8 +132,8 @@ export function validateScene(run,scene,positions,facings=[],holds=[]){
   const issues=[],add=(player,message)=>issues.push({player,message});
   positions.forEach((p,i)=>{const landing=scene.knockback?knockback(p,scene.knockback.origin,scene.knockback.amount):p;if(landing.x<2||landing.x>98||landing.y<2||landing.y>98)add(i,'落點碰到場地火牆。靠近擊退來源，保留落點空間。');if(!scene.hazardImmune?.includes(i)&&scene.hazards.some(h=>inside(p,h)||inside(landing,h)))add(i,'站在危險範圍內；先確認安全半場或安全格。');});
   for(const {player,r} of scene.spreads)for(let j=0;j<8;j++)if(j!==player&&distance(positions[player],positions[j])<r)add(player,`範圍與 ${ROLES[j]} 重疊，請拉開距離。`);
-  for(const {player,r,count} of scene.stacks){const nearby=positions.map((p,i)=>distance(p,positions[player])<=r?i:-1).filter(i=>i>=0);if(nearby.length!==count)add(player,`分攤需要 ${count} 人，目前 ${nearby.length} 人。`);}
-  for(const tower of scene.towers){const occupants=positions.map((p,i)=>distance(p,tower)<=tower.r?i:-1).filter(i=>i>=0);if(occupants.length!==1||!tower.players.includes(occupants[0])){const player=tower.players.includes(run.me)?run.me:tower.players[0];add(player,`第 ${tower.label} 塔需要指定的 ${tower.players.map(i=>ROLES[i]).join('/')} 單獨踩塔。`);}}
+  for(const {player,r,count,players} of scene.stacks){const nearby=positions.map((p,i)=>distance(p,positions[player])<=r?i:-1).filter(i=>i>=0);if(nearby.length!==count)add(player,`分攤需要 ${count} 人，目前 ${nearby.length} 人。`);else if(players?.some(i=>!nearby.includes(i)))add(player,'分攤人數正確，但搭檔不符合本輪分工。');}
+  for(const tower of scene.towers){const occupants=positions.map((p,i)=>distance(p,tower)<=tower.r?i:-1).filter(i=>i>=0),count=tower.count??1;if(occupants.length!==count||occupants.some(i=>!tower.players.includes(i))){const player=tower.players.includes(run.me)?run.me:tower.players[0];add(player,`第 ${tower.label} 塔需要指定的 ${tower.players.map(i=>ROLES[i]).join('/')} ${count===1?'單獨踩塔':`共 ${count} 人踩塔`}。`);}}
   for(const z of scene.zones||[])for(const i of z.players)if(distance(positions[i],z)>z.r)add(i,'沒有站在本輪需要的位置，請依狀態前往目標區域。');
   for(const b of scene.isolation||[])for(const i of b.others)if(distance(positions[b.player],positions[i])<b.r)add(i,'靠近了紫圈玩家，會引發全隊失敗。');
   for(const rule of scene.facing){const a=facings[rule.player]??-Math.PI/2,p=positions[rule.player];if(rule.toward&&angleDelta(a,angleTo(p,rule.toward))>Math.PI/5)add(rule.player,'眼睛沒有面向指定蛇；先轉向再結算。');if(rule.away?.some(q=>angleDelta(a,angleTo(p,q))<Math.PI/2))add(rule.player,'面向正在讀條的蛇眼，會被石化。');}
@@ -139,5 +141,5 @@ export function validateScene(run,scene,positions,facings=[],holds=[]){
   if(scene.nearest){const b=scene.nearest;const active=Math.max(...b.players.map(i=>distance(positions[i],b.origin))),other=Math.min(...positions.filter((_,i)=>!b.players.includes(i)).map(p=>distance(p,b.origin)));if(active>=other)for(const i of b.players)add(i,'本輪四人必須比外側組更靠近王。');}
   if(scene.elemental){const origin=positions[scene.purple[1]],rank=positions.map((p,i)=>({i,d:distance(p,origin)})).filter(a=>!scene.purple.includes(a.i)).sort((a,b)=>a.d-b.d);const baiters=scene.elemental==='fire'?rank.slice(-3):rank.slice(0,2);const hitGroups=new Set(baiters.map(b=>scene.activeGroups.findIndex(g=>g.includes(b.i))));if(hitGroups.size!==scene.activeGroups.length)for(const b of baiters)add(b.i,'火需由最遠三組、冰需由最近兩組各一人引導。請調整組內遠近。');}
   (scene.fusion||[]).forEach((pair,k)=>{if(!(holds[k]>=2))pair.forEach(i=>add(i,'尚未與正確搭檔持續靠近兩秒完成合成。'));});
-  return issues;
+  return issues.concat(validateTopRules(scene,positions,facings),validateM5sRules(scene,positions));
 }

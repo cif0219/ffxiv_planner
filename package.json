@@ -2,5 +2,9 @@
   "name": "echo-raid-lab",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test tests/*.test.mjs", "start": "node server.mjs", "check": "node --check dist/portal.mjs && node --check dist/raid-engine.mjs && node --check dist/raids.mjs" }
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "start": "node server.mjs",
+    "check": "node --check dist/portal.mjs && node --check dist/raid-engine.mjs && node --check dist/raids.mjs && node --check dist/top-engine.mjs && node --check dist/top-rules.mjs && node --check dist/top-data.mjs && node --check dist/m5s-engine.mjs && node --check dist/m5s-data.mjs && node --check dist/m5s-rules.mjs"
+  }
 }
